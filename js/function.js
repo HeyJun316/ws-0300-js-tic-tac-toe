@@ -16,44 +16,49 @@ const deleteCount = 1;
 let currentPlayer = '○';
 let count = 0;
 let fin = false;
-let board = [
-  [0, 0, 0], // 0
-  [0, 0, 0], // 1
-  [0, 0, 0]  // 2
-];
+let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-cells.forEach(function (element) {
+const patterns = [
+  // 横
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  // 縦
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  // 斜
+  [0, 4, 8],
+  [2, 4, 6]
+]
+
+cells.forEach(function (element, index) {
   element.addEventListener('click', function (e) {
     // 書き込まれてる場合、countが9の場合、一列揃った場合は、クリックしても無効化
-    if (element.innerHTML !== '' || count === maxCellNum || fin === true) {
+    if (element.innerHTML !== '' || fin === true) {
       return;
     }
 
+    // IDから取得しているのでDOMに依存している
+    // なのでforEachの第二引数からindexを取得
+    // let checkedId = element.id;
+
     // プレイヤーの記号を格納
     element.innerHTML = currentPlayer === circlePlayer ? circlePlayer : crossPlayer;
+    board[index] = currentPlayer === circlePlayer ? circleNum: crossNum ;
 
-    let checkedId = element.id;
-    let checkedPlayer = element.innerHTML;
-
-    // プレイヤー番号を格納
-    let playerNum = checkedPlayer === circlePlayer ? circleNum : crossNum;
-
-    checkBoard(checkedId, playerNum);
-    if (checkWin(circleNum)) {
-      messageClass.innerHTML = '○ win!!';
-      return fin = true;
+    if (checkWin()) {
+      messageClass.innerHTML = `${currentPlayer} win!!`;
+      fin = true;
     };
 
-    if (checkWin(crossNum)) {
-      messageClass.innerHTML = '× win!!';
-      return fin = true;
-    }
     switchPlayer();
     count++;
 
     // マスが全て埋まったら、’引き分け’を表示
     if (count === maxCellNum) {
       messageClass.innerHTML = draw;
+      fin = true;
     }
   })
 })
@@ -81,37 +86,13 @@ restart.addEventListener('click', function () {
   window.location.reload();
 });
 
-// board配列に、チェックしたプレイヤー番号を格納
-function checkBoard(checkedId, playerNum) {
-  if (checkedId === '0' || checkedId === '1' || checkedId === '2') {
-    return board[0].splice(checkedId, deleteCount, playerNum);
-  } else if (checkedId === '3' || checkedId === '4' || checkedId === '5') {
-    return board[1].splice(checkedId - 3, deleteCount, playerNum);
-  } else if (checkedId === '6' || checkedId === '7' || checkedId === '8') {
-    return board[2].splice(checkedId - 6, deleteCount, playerNum);
-  }
-}
-
 // 勝敗チェック
-function checkWin(num) {
-  // 縦横列 チェック
-  for (let i = 0; i <= boardMaxIndex; i++) {
-    console.log(i + '=i');
-    if (board[i][0] === num && board[i][1] === num && board[i][2] === num ){
-      return true;
-    }
-    if (board[0][i] === num && board[1][i] === num && board[2][i] === num ){
-      return true;
+function checkWin() {
+  return patterns.some(([first, second, third]) => {
+    if (board[first] !== 0 && (board[first] === board[second] && board[second] === board[third])) {
+      return true
     }
 
-  }
-  // 斜列チェック
-  if (board[0][0] === num && board[1][1] === num && board[2][2] === num ){
-    return true;
-  }
-  if (board[0][2] === num && board[1][1] === num && board[2][0] === num ){
-    return true;
-  }
-
-  return false;
+    return false
+  })
 }
