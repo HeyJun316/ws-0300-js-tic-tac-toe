@@ -49,7 +49,7 @@ cells.forEach(function (element, index) {
 
     if (checkWin()) {
       messageClass.innerHTML = `${currentPlayer} win!!`;
-      fin = true;
+      return fin = true;
     };
 
     switchPlayer();
